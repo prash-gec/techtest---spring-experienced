@@ -4,6 +4,7 @@ import com.db.dataplatform.techtest.TechTestApplication;
 import com.db.dataplatform.techtest.server.api.model.DataBody;
 import com.db.dataplatform.techtest.server.api.model.DataEnvelope;
 import com.db.dataplatform.techtest.server.api.model.DataHeader;
+import com.db.dataplatform.techtest.server.component.HadoopClient;
 import com.db.dataplatform.techtest.server.component.Server;
 import com.db.dataplatform.techtest.server.persistence.BlockTypeEnum;
 import com.db.dataplatform.techtest.server.persistence.model.DataBodyEntity;
@@ -38,9 +39,9 @@ public class ServerImpl implements Server {
     private final DataBodyService dataBodyServiceImpl;
     private final ModelMapper modelMapper;
 
-    private final RestTemplate serverRestTemplate;
+    private final HadoopClient hadoopClient;
 
-    public static final String URI_DATALAKE = "http://localhost:8090/hadoopserver/pushbigdata";
+
 
     /**
      * @param envelope
@@ -52,9 +53,10 @@ public class ServerImpl implements Server {
         if(isValidChecksum(envelope)){
             String data = new ObjectMapper().writeValueAsString(envelope);
             try{
-                pushToDataLake(data);
+                hadoopClient.pushToDataLake(data);
+                log.info("data {} pushed to datalake", envelope.getDataHeader().getName());
             }catch(RuntimeException re){
-                log.error("Error pushing data to datalake", re);
+                log.error("Error pushing data {} to datalake", envelope.getDataHeader().getName(), re);
             }
 
             // Save to persistence.
@@ -112,16 +114,8 @@ public class ServerImpl implements Server {
         saveData(dataBodyEntity);
     }
 
-
     private void saveData(DataBodyEntity dataBodyEntity) {
         dataBodyServiceImpl.saveDataBody(dataBodyEntity);
     }
-
-    @Retryable(maxAttempts=5, value = HttpServerErrorException.GatewayTimeout.class,
-            backoff = @Backoff(delay = 15000, multiplier = 2))
-    private void pushToDataLake(String data){
-        serverRestTemplate.postForObject(URI_DATALAKE, data, ResponseEntity.class);
-    }
-
 
 }

@@ -1,6 +1,7 @@
 package com.db.dataplatform.techtest.service;
 
 import com.db.dataplatform.techtest.server.api.model.DataEnvelope;
+import com.db.dataplatform.techtest.server.component.HadoopClient;
 import com.db.dataplatform.techtest.server.mapper.ServerMapperConfiguration;
 import com.db.dataplatform.techtest.server.persistence.model.DataBodyEntity;
 import com.db.dataplatform.techtest.server.persistence.model.DataHeaderEntity;
@@ -36,7 +37,7 @@ public class ServerServiceTests {
     private DataEnvelope testDataEnvelope;
 
     @Mock
-    private RestTemplate restTemplate;
+    private HadoopClient hadoopClient;
     private Server server;
 
     @Before
@@ -48,7 +49,7 @@ public class ServerServiceTests {
         expectedDataBodyEntity = modelMapper.map(testDataEnvelope.getDataBody(), DataBodyEntity.class);
         expectedDataBodyEntity.setDataHeaderEntity(modelMapper.map(testDataEnvelope.getDataHeader(), DataHeaderEntity.class));
 
-        server = new ServerImpl(dataBodyServiceImplMock, modelMapper, restTemplate);
+        server = new ServerImpl(dataBodyServiceImplMock, modelMapper, hadoopClient);
     }
 
     @Test
