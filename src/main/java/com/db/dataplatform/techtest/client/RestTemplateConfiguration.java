@@ -26,9 +26,9 @@ public class RestTemplateConfiguration {
         RestTemplate restTemplate = restTemplateBuilder.build();
 
         CloseableHttpClient client = HttpClients.createDefault();
-        RestTemplate template= new RestTemplate();
-        template.setRequestFactory(new HttpComponentsClientHttpRequestFactory(client));
-        template.setMessageConverters(Arrays.asList(mappingJackson2HttpMessageConverter, stringHttpMessageConverter));
+        //RestTemplate template= new RestTemplate();
+        restTemplate.setRequestFactory(new HttpComponentsClientHttpRequestFactory(client));
+        restTemplate.setMessageConverters(Arrays.asList(mappingJackson2HttpMessageConverter, stringHttpMessageConverter));
 
         return restTemplate;
     }

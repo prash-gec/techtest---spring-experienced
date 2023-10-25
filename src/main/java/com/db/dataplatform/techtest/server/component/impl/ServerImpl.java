@@ -20,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import javax.xml.bind.DatatypeConverter;
@@ -37,7 +38,7 @@ public class ServerImpl implements Server {
     private final DataBodyService dataBodyServiceImpl;
     private final ModelMapper modelMapper;
 
-    private final RestTemplate restTemplate;
+    private final RestTemplate serverRestTemplate;
 
     public static final String URI_DATALAKE = "http://localhost:8090/hadoopserver/pushbigdata";
 
@@ -50,7 +51,12 @@ public class ServerImpl implements Server {
 
         if(isValidChecksum(envelope)){
             String data = new ObjectMapper().writeValueAsString(envelope);
-            pushToDataLake(data);
+            try{
+                pushToDataLake(data);
+            }catch(RuntimeException re){
+                log.error("Error pushing data to datalake", re);
+            }
+
             // Save to persistence.
             persist(envelope);
             log.info("Data persisted successfully, data name: {}", envelope.getDataHeader().getName());
@@ -111,10 +117,10 @@ public class ServerImpl implements Server {
         dataBodyServiceImpl.saveDataBody(dataBodyEntity);
     }
 
-    @Retryable(maxAttempts=5, value = RuntimeException.class,
+    @Retryable(maxAttempts=5, value = HttpServerErrorException.GatewayTimeout.class,
             backoff = @Backoff(delay = 15000, multiplier = 2))
     private void pushToDataLake(String data){
-        restTemplate.postForObject(URI_DATALAKE, data, ResponseEntity.class);
+        serverRestTemplate.postForObject(URI_DATALAKE, data, ResponseEntity.class);
     }
 
 

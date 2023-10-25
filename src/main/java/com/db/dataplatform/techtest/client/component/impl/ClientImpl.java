@@ -50,7 +50,7 @@ public class ClientImpl implements Client {
     public boolean updateData(String blockName, String newBlockType) {
         log.info("Updating blocktype to {} for block with name {}", newBlockType, blockName);
         Map<String, String> uriVariables = new HashMap<>();
-        uriVariables.put("blockType", newBlockType);
+        uriVariables.put("newBlockType", newBlockType);
         uriVariables.put("name", blockName);
         Boolean response = restTemplate.patchForObject(URI_PATCHDATA.expand(uriVariables), null, Boolean.class);
         if(response==null)

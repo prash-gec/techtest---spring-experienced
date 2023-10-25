@@ -39,13 +39,13 @@ public class ServerController {
     }
 
     @GetMapping(value = "/data/{blockType}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> getData(@PathVariable BlockTypeEnum blockType){
+    public ResponseEntity<?> getData(@Valid @PathVariable BlockTypeEnum blockType){
         log.info("fetching data for block type {}", blockType);
         return ResponseEntity.ok(server.getData(blockType));
     }
 
-    @PatchMapping(value = "/update/{name}/{newBlockType}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Boolean> patchData(@PathVariable String name, @PathVariable BlockTypeEnum blockType) throws IOException, NoSuchAlgorithmException {
+    @PatchMapping(value = "/update/{name}/{blockType}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Boolean> patchData(@PathVariable String name, @Valid @PathVariable BlockTypeEnum blockType) throws IOException, NoSuchAlgorithmException {
 
         log.info("update received for block name : {} to blockType : {}", name, blockType);
 
